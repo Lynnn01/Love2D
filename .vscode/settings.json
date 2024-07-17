@@ -1,3 +1,14 @@
 {
-  "Lua.diagnostics.globals": ["love", "player", "background", "anim8"]
+  "Lua.diagnostics.globals": [
+    "love",
+    "player",
+    "background",
+    "anim8",
+    "st",
+    "grid",
+    "movement",
+    "playerSprite",
+    "playerMovement"
+  ],
+  "Lua.diagnostics.disable": ["lowercase-global"]
 }
