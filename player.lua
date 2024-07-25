@@ -1,51 +1,98 @@
-player = {
-    love.graphics.setDefaultFilter("nearest", "nearest"),
-    x = 400,
-    y = 200,
-    speed = 5,
-    framerate = 0.1,
-    sprite = love.graphics.newImage("sprites/parrot.png"),
-    spriteSheet = love.graphics.newImage("sprites/player-sheet.png"),
-    animations = {}
-}
+Player = {}
+Player.__index = Player
 
-function playerSprite()
-    anim8 = require "libraries/anim8"
-    local grid = anim8.newGrid(12, 18, player.spriteSheet:getWidth(), player.spriteSheet:getHeight())
-    player.animations.down = anim8.newAnimation(grid("1-4", 1), player.framerate)
-    player.animations.left = anim8.newAnimation(grid("1-4", 2), player.framerate)
-    player.animations.right = anim8.newAnimation(grid("1-4", 3), player.framerate)
-    player.animations.up = anim8.newAnimation(grid("1-4", 4), player.framerate)
-    player.anim = player.animations.left
+function Player.new()
+    local self = setmetatable({}, Player)
+
+    love.graphics.setDefaultFilter("nearest", "nearest")
+    self.x = 400
+    self.y = 200
+    self.speed = 250
+    self.framerate = 0.1
+    self.sprite = love.graphics.newImage("sprites/parrot.png")
+    self.spriteSheet = love.graphics.newImage("sprites/player-sheet.png")
+    self.animations = {}
+    self.anim = nil
+
+    self:initializeAnimations()
+
+    return self
 end
 
-function playerMovement(dt)
+function Player:initializeAnimations()
+    anim8 = require "libraries/anim8"
+    local grid = anim8.newGrid(12, 18, self.spriteSheet:getWidth(), self.spriteSheet:getHeight())
+    self.animations.down = anim8.newAnimation(grid("1-4", 1), self.framerate)
+    self.animations.left = anim8.newAnimation(grid("1-4", 2), self.framerate)
+    self.animations.right = anim8.newAnimation(grid("1-4", 3), self.framerate)
+    self.animations.up = anim8.newAnimation(grid("1-4", 4), self.framerate)
+    self.anim = self.animations.left
+end
+
+function Player:update(dt)
     local isMoving = false
+    self:push()
 
     if love.keyboard.isDown("right") then
-        player.x = player.x + player.speed
-        player.anim = player.animations.right
+        self.x = self.x + self.speed * dt
+        self.anim = self.animations.right
         isMoving = true
     end
+
     if love.keyboard.isDown("left") then
-        player.x = player.x - player.speed
-        player.anim = player.animations.left
+        self.x = self.x - self.speed * dt
+        self.anim = self.animations.left
         isMoving = true
     end
+
     if love.keyboard.isDown("up") then
-        player.y = player.y - player.speed
-        player.anim = player.animations.up
+        self.y = self.y - self.speed * dt
+        self.anim = self.animations.up
         isMoving = true
     end
+
     if love.keyboard.isDown("down") then
-        player.y = player.y + player.speed
-        player.anim = player.animations.down
+        self.y = self.y + self.speed * dt
+        self.anim = self.animations.down
         isMoving = true
     end
 
     if not isMoving then
-        player.anim:gotoFrame(2)
+        self.anim:gotoFrame(2)
     end
 
-    player.anim:update(dt)
+    self.anim:update(dt)
 end
+
+function Player:push()
+    if love.keyboard.isDown("lshift") then
+        self.speed = 400
+    elseif love.keyboard.isDown("lctrl") then
+        self.speed = 100
+    else
+        self.speed = 250
+    end
+end
+
+function Player:draw()
+    local sprite = {}
+    if love.keyboard.isDown("z") then
+        if love.keyboard.isDown("x") then
+            love.graphics.setColor(1, 1, 1, 0.5)
+            love.graphics.draw(self.sprite, self.x, self.y, nil, 0.3)
+            love.graphics.setColor(1, 1, 1, 1)
+        else
+            love.graphics.draw(self.sprite, self.x, self.y, nil, 0.3)
+        end
+    else
+        if love.keyboard.isDown("x") then
+            love.graphics.setColor(1, 1, 1, 0.5)
+            self.anim:draw(self.spriteSheet, self.x, self.y, nil, 3)
+            love.graphics.setColor(1, 1, 1, 1)
+        else
+            self.anim:draw(self.spriteSheet, self.x, self.y, nil, 3)
+        end
+    end
+end
+
+return Player
